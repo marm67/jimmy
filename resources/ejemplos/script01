@@ -1,0 +1,2 @@
+set entorno(prod)
+define servicio(sda) tran(xala) prog(programa)

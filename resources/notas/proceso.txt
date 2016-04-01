@@ -1,0 +1,44 @@
+Script:
+	set entorno(prod)
+	set ambito(xcom)
+	r2d2 define servicio(sda) tran(a5mi) prog(a500cpco)
+
+-- 	r2d2 define servicio(sda) tran(a5mi) prog(a500cpco) target(prod/xcom)
+
+Parser:
+	set entorno(prod)
+	set ambito(xcom)
+	ceda define tran(A5WB) target(elis)
+	ceda define tran(A500) target(elis)
+	ceda define tran(A5MI) target(tores)
+	ceda define tran(A5MI) target(aores)
+	ceda define prog(A500CPCO) target(tores)
+	ceda define prog(A500CPCO) target(aores)
+
+Target:
+	ceda define tran(A5WB) target(cicseli8)
+	ceda define tran(A5WB) target(cicseli9)
+
+	ceda define tran(A500) target(cicseli8)
+	ceda define tran(A500) target(cicseli9)
+
+	ceda define tran(A5MI) target(cicseat2)
+	ceda define tran(A5MI) target(cicseat3)
+
+	ceda define tran(A5MI) target(cicseata)
+	ceda define tran(A5MI) target(cicseatb)
+	ceda define tran(A5MI) target(cicseatc)
+	ceda define tran(A5MI) target(cicseatd)
+
+	ceda define prog(A500CPCO) target(cicseat2)
+	ceda define prog(A500CPCO) target(cicseat3)
+
+	ceda define tran(A5MI) target(cicseata)
+	ceda define tran(A5MI) target(cicseatb)
+	ceda define tran(A5MI) target(cicseatc)
+	ceda define tran(A5MI) target(cicseatd)
+
+Reglas:
+
+
+XML:
