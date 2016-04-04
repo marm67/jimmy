@@ -12,7 +12,15 @@ object Main extends App { //with CSSInliner {
     //pruebaPlantillas()
     //pruebaConf()
     //pruebaConfEntornos()
-    pruebaReglas()
+    //pruebaReglas()
+    prueba
+  }
+
+  def prueba = {
+    import com.typesafe.config.ConfigFactory
+    val osName = ConfigFactory.load().getString("os.name")
+    println(osName)
+
   }
   
   def pruebaReglas() = {
@@ -47,8 +55,6 @@ object Main extends App { //with CSSInliner {
     println(config.getString("app.path.plantillas"))
 
 
-    // val sysConfig = ConfigFactory.load()
-    // println(sysConfig)
   }
 
   def pruebaConfEntornos() = {
