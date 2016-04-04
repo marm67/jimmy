@@ -1,9 +1,9 @@
 package main.scala
 
 import scala.io.Source
-import main.java.CSSInliner
+// import main.java.CSSInliner
 
-object Main extends App with CSSInliner {
+object Main extends App { //with CSSInliner {
   
   val pathResources = "c:/scala/proyectos/jimmy/resources/"
 
@@ -16,15 +16,15 @@ object Main extends App with CSSInliner {
   }
   
   def pruebaReglas() = {
-    import java.io._
+    // import java.io._
 
-    val xml = """<cicslocaltransaction tranclass="DFHTCL00" tranid="XALA" trprof="" twasize="0" usecount="57"/>"""
-    val pathReglas = """c:/scala/proyectos/jimmy/resources/reglas/rules.css"""
+    // val xml = """<cicslocaltransaction tranclass="DFHTCL00" tranid="XALA" trprof="" twasize="0" usecount="57"/>"""
+    // val pathReglas = """c:/scala/proyectos/jimmy/resources/reglas/rules.css"""
 
-    val xml1 = inlineStyles(xml, new File(pathReglas), false)
+    // val xml1 = inlineStyles(xml, new File(pathReglas), false)
 
-    println(xml)
-    println(xml1)
+    // println(xml)
+    // println(xml1)
 
   }
 
