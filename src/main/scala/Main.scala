@@ -1,26 +1,55 @@
+/*
+    fatJar -> Comando 'assembly' en sbt
+ */
 package main.scala
 
 import scala.io.Source
+import java.io.File
 // import main.java.CSSInliner
 
-object Main extends App { //with CSSInliner {
+case class CmdOpciones(
+    config: File = new File("./jimmy.conf")
+  , usuario: String = ""
+  , password: String = ""
+)
+
+object Main { //extends App { //with CSSInliner {
   
   val pathResources = "c:/scala/proyectos/jimmy/resources/"
 
-  override def main(args: Array[String]) {
+  // run -c "c:/scala/proyectos/jimmy/resources/conf/app.conf"  -u usuraio -p password
+  def main(args: Array[String]) {
+    loadConfig(args)
     //pruebaScript(args(0))
     //pruebaPlantillas()
     //pruebaConf()
+    //pruebaAssembly()
     //pruebaConfEntornos()
     //pruebaReglas()
-    prueba
+    //prueba
+  }
+
+  private def loadConfig(args: Array[String]) = {
+    val parser = new scopt.OptionParser[CmdOpciones]("jimmy") {
+      head("jimmy", "1.x")
+      opt[String]('u', "usuario")   valueName("<usuario>")  required() action { (x, c) => c.copy(usuario = x) } text("usuario requerido")
+      opt[String]('p', "password")  valueName("<password>") required() action { (x, c) => c.copy(password = x) } text("password requerida") 
+      opt[File]('c', "config")      valueName("<fichero>") action { (x, c) => c.copy(config = x) } text("Fichero de configuracion, por defecto ./jimmy.conf")
+    }
+
+    parser.parse(args, CmdOpciones()) match {
+      case Some(opciones) => {
+        Config.load(opciones)
+      }
+      case None =>
+        println("chungo")
+    }
   }
 
   def prueba = {
     import com.typesafe.config.ConfigFactory
     val osName = ConfigFactory.load().getString("os.name")
     println(osName)
-
   }
   
   def pruebaReglas() = {
@@ -43,6 +72,19 @@ object Main extends App { //with CSSInliner {
     
     val p = new Parser
     val query = p.parseUno(script)
+  }
+
+  def pruebaAssembly() = {
+    import java.io._
+    import com.typesafe.config.ConfigFactory
+    
+    val config = ConfigFactory.parseFile(new File("application.conf")).resolve() 
+//    val config = ConfigFactory.load()
+    println(config)
+    val kk = config.getString("cmci.produccion.port")
+    println(s"""cmci.produccion.port = $kk""")
+
+
   }
 
   def pruebaConf() = {

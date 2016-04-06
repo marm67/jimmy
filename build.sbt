@@ -12,7 +12,8 @@ libraryDependencies ++= Seq(
 	"com.typesafe" % "config" % "1.2.1",
 	"org.freemarker" % "freemarker" % "2.3.20",
 	"org.jsoup" % "jsoup" % "1.8.3",
-	"net.sourceforge.cssparser" % "cssparser" % "0.9.18"
+	"net.sourceforge.cssparser" % "cssparser" % "0.9.18",
+	"com.github.scopt" %% "scopt" % "3.4.0"
 )
 
 scalacOptions in Test ++= Seq("-Yrangepos")

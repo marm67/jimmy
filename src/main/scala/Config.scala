@@ -1,18 +1,24 @@
+package main.scala
+
 import java.io._
 import com.typesafe.config.ConfigFactory
 import collection.JavaConversions._
 
-trait Config {
+object Config {
 
-    // private val CONF_PATH = """c:/scala/proyectos/jimmy/resources/conf"""
-    private val CONF_PATH = 
-    	if ( ConfigFactory.load().getString("os.name") == "Mac OS X" )
-    		"""/Users/miguel/programacion/scala/jimmy/resources/conf"""
-    	else
-    		"""c:/scala/proyectos/jimmy/resources/conf"""
+	private var user: String                       = null
+	private var pass: String                       = null
+	private var config: com.typesafe.config.Config = null
 
-    val AppConfig = ConfigFactory.parseFile(new File(CONF_PATH + """/app.conf""")).resolve()
+	def load(opciones: CmdOpciones) = {
+		user   = opciones.usuario
+		pass   = opciones.password
+		config = ConfigFactory.parseFile(opciones.config).resolve()		
+	}
 
-    def getCicsEntorno(t: String) = AppConfig.getStringList( s"""plataforma.$t""" ).toList
-
+	def usuario  = user
+	def password = pass
+	def apply(s: String) = config.getString(s)
+    def getCicsEntorno(t: String) = config.getStringList( s"""plataforma.$t""" ).toList
+    
 }
