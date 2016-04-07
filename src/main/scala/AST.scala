@@ -1,30 +1,26 @@
 package main.scala
 
-case class Servicio(tipo: String)
+case class Script(items: Seq[Comando])
 
-trait Comando {
-	def check(): Unit
-}
+sealed trait Comando
+case class Set(variable: String, valor: String) extends Comando 
+case class Ceda(op: CedaOp, rec: RecursoT) extends Comando 
+case class Cemt(op: CemtOp, rec: RecursoT)) extends Comando 
 
-case class Define(servicio: Servicio, parametros: Map[String, String]) extends Comando {
-	def toComando = {
-		"%s %s %s(%s) %s" format (
-			 "DEFINE" 
-			, servicio.tipo 
-			, parametros map { case (k,v) => "%s(%s)" format (k,v) } mkString ("", " ", " ")
-		)
-	}
+sealed trait RecursoT
+case class Recurso(tipo: String, nombre: String, parametros: Map[String, String]) extends RecursoT
+case class Servicio(servicio: String, parametros: Map[String, String]) extends RecursoT
 
-	def check = {
-		// check plantilla
-		val plantilla = servicio.tipo		
-	    val path = s"""c:/scala/proyectos/jimmy/resources/plantillas/$plantilla"""
-	    println(path)
-	}
-}
+sealed trait Operacion
 
-case class Set(variable: String, valor: String) extends Comando {
-	def check = {}
+sealed trait CedaOp extends Operacion
+case class Expand extends CedaOp
+case class Define extends CedaOp
+case class Alter extends CedaOp
+case class Delete extends CedaOp
 
-}
-
+sealed trait CemtOp extends Operacion
+case class Inquire extends CemtOp
+case class Create extends CemtOp
+case class Set extends CemtOp
+case class Discard extends CemtOp

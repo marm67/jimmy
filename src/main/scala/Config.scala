@@ -5,20 +5,20 @@ import com.typesafe.config.ConfigFactory
 import collection.JavaConversions._
 
 object Config {
-
-	private var user: String                       = null
-	private var pass: String                       = null
+	private var opciones: CmdOpciones              = null
 	private var config: com.typesafe.config.Config = null
 
-	def load(opciones: CmdOpciones) = {
-		user   = opciones.usuario
-		pass   = opciones.password
-		config = ConfigFactory.parseFile(opciones.config).resolve()		
+	def load(opt: CmdOpciones) = {
+		opciones = opt
+		config = ConfigFactory.parseFile(opt.config).resolve()		
 	}
 
-	def usuario  = user
-	def password = pass
-	def apply(s: String) = config.getString(s)
-    def getCicsEntorno(t: String) = config.getStringList( s"""plataforma.$t""" ).toList
-    
+	def apply(s: String) = s match {
+		case "usuario"  => opciones.usuario
+		case "password" => opciones.password
+		case "script"   => opciones.script
+		case _          => config.getString(s)
+	}
+		
+	def getCicsEntorno(t: String) = config.getStringList( s"""plataforma.$t""" ).toList
 }

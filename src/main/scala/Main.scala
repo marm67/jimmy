@@ -11,15 +11,13 @@ case class CmdOpciones(
     config: File = new File("./jimmy.conf")
   , usuario: String = ""
   , password: String = ""
+  , script: String = ""
 )
 
 object Main { //extends App { //with CSSInliner {
-  
-  val pathResources = "c:/scala/proyectos/jimmy/resources/"
-
-  // run -c "c:/scala/proyectos/jimmy/resources/conf/app.conf"  -u usuraio -p password
+  // run -s "c:/scala/proyectos/jimmy/resources/ejemplos/script01" -c "c:/scala/proyectos/jimmy/resources/conf/app.conf" -u usuario -p password
   def main(args: Array[String]) {
-    loadConfig(args)
+    if (loadConfig(args)) runScript()
     //pruebaScript(args(0))
     //pruebaPlantillas()
     //pruebaConf()
@@ -29,9 +27,10 @@ object Main { //extends App { //with CSSInliner {
     //prueba
   }
 
-  private def loadConfig(args: Array[String]) = {
+  private def loadConfig(args: Array[String]): Boolean = {
     val parser = new scopt.OptionParser[CmdOpciones]("jimmy") {
       head("jimmy", "1.x")
+      opt[String]('s', "script")  valueName("<script>") required() action { (x, c) => c.copy(script = x) } text("Fichero de script requerido") 
       opt[String]('u', "usuario")   valueName("<usuario>")  required() action { (x, c) => c.copy(usuario = x) } text("usuario requerido")
       opt[String]('p', "password")  valueName("<password>") required() action { (x, c) => c.copy(password = x) } text("password requerida") 
       opt[File]('c', "config")      valueName("<fichero>") action { (x, c) => c.copy(config = x) } text("Fichero de configuracion, por defecto ./jimmy.conf")
@@ -40,10 +39,35 @@ object Main { //extends App { //with CSSInliner {
     parser.parse(args, CmdOpciones()) match {
       case Some(opciones) => {
         Config.load(opciones)
+        true
       }
       case None =>
         println("chungo")
+        false
     }
+  }
+
+  private def runScript() = {
+    val fscript = Config("script")
+
+    if ( !new java.io.File(fscript).exists ) {
+      val msg = s"""ERROR. No existe el fichero '$fscript'""" 
+      Console.err.println(msg)
+      System.exit(0)
+    }
+
+    /* test file readable */
+    /* return exit code error (non zero) if a file is not readable */
+    if ( !new java.io.File(fscript).canRead) {
+      println( s"""ERROR. El fichero no es legible '$fscript'""")
+      System.exit(0)
+    }
+
+    val script = Source.fromFile(fscript).mkString
+    println(script)
+    
+    val p = new Parser
+    val query = p.parseUno(script)
   }
 
   def prueba = {
