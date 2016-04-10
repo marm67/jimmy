@@ -1,4 +1,4 @@
-package main.scala
+package jimmy
 
 import java.io._
 import com.typesafe.config.ConfigFactory

@@ -1,16 +1,17 @@
-package main.scala
+package jimmy
 
+import jimmy._
 import scala.annotation.tailrec
 import scala.collection.mutable
 
 object Interpreter {
 
   class ScriptExecution(script: Script, globalContext: GlobalContext) {
-    def procesa = for (e <- script.items) procesaElemento(e)
+    def procesa = for (e <- script.comandos) procesaElemento(e)
 
-    private def procesaElemento(e: ScriptElemento): Unit = (e: @unchecked) match {
-      case Set(variable, valor)  => procesaSet(variable, valor)
-      case Define(servicio, parametros)  => procesaDefine(servicio, parametros)
+    private def procesaElemento(e: Comando): Unit = (e: @unchecked) match {
+      case SET(variable, valor)  => procesaSet(variable, valor)
+//      case CEDA(servicio, parametros)  => procesaDefine(servicio, parametros)
     }
 
     private def procesaSet(variable: String, valor: String) ={

@@ -1,8 +1,9 @@
 /*
     fatJar -> Comando 'assembly' en sbt
  */
-package main.scala
+package jimmy
 
+import jimmy._
 import scala.io.Source
 import java.io.File
 // import main.java.CSSInliner

@@ -1,48 +1,30 @@
-package main.scala
+package jimmy
 
+import jimmy._
 import scala.util.parsing.combinator._
 import scala.util.parsing.combinator.syntactical._
 
-class Parser extends JavaTokenParsers {
-  
-  def script: Parser[Seq[Comando]] = comando ~ rep(comando) ^^
-    { case a ~ b => a :: b }
+object Parser extends JavaTokenParsers {
+
+  def script: Parser[Seq[Comando]] = comando ~ rep(comando) ^^ { case a ~ b => a :: b }
 
   def comando: Parser[Comando] = cemt | ceda | set
 
-  def cemt: Parser[Comando] = "CEMT" ~ cemtOp ~ recurso ~ parametros ^^
-    { case a ~ b ~ c ~ d => Cemt(b, c, d) }
+  def set: Parser[Comando] = "SET" ~> ident ~ ("(" ~> ident <~ ")") ^^ { case a ~ b => SET(a, b) }
 
-  def cemtOp: Parser[CemtOp] = "INQUIRE" | "CREATE" | "SET" | "DISCARD" ^^  { 
-      case "INQUIRE" => Inquire
-      case "CREATE"  => Create
-      case "SET"     => Set
-      case "DISCARD" => Discard
-  }
+  def cemt: Parser[Comando] = "CEMT" ~> ("INQUIRE" | "CREATE" | "SET" | "DISCARD") ~ recursoT ^^ { case a ~ b  => CEMT(a, b) }
 
-  def ceda: Parser[Comando] = "CEDA" ~> accionCeda ~ recurso ~ parametros ^^
-    { case a ~ b ~ c => Ceda(a,b,c) }
+  def ceda: Parser[Comando] = "CEDA" ~> ("EXPAND" | "DEFINE" | "ALTER" | "DELETE") ~ recursoT ^^ { case a ~ b => CEDA(a, b) }
 
-  def accionCeda: Parser[String] = "EXPAND" | "DEFINE" | "ALTER" | "DELETE" ^^  { 
-      case "EXPAND" => Expand
-      case "DEFINE" => Define
-      case "ALTER"  => Alter
-      case "DELETE" => Delete
-  }
+  def recursoT: Parser[RecursoT] = servicio | recurso ^^ { case a => a }
 
-  def define: Parser[Comando] = "DEFINE" ~> (servicio("define") ~ parametros) ^^
-    { case serv ~ param => servDefine(a, b) }
+  def servicio: Parser[Servicio] = "SERVICIO" ~ "(" ~ valor ~ ")" ~ parametros ^^ { case a ~ "(" ~ b ~ ")" ~ c => Servicio(b, c) }
 
-  def set: Parser[Comando] = "SET" ~> ident ~ ("(" ~> ident <~ ")") ^^
-    { case a ~ b => Set(a, b) }
-
-  def servicio(op: String): Parser[Servicio] = "SERVICIO" ~ "(" ~ valor ~ ")" ^^
-    { case k ~ "(" ~ v ~ ")" => Servicio(v) }
+  def recurso: Parser[Recurso] = ident ~ "(" ~ valor ~ ")" ~ parametros ^^ { case a ~ "(" ~ b ~ ")" ~ c => Recurso(a, b, c) }
 
   def parametros: Parser[Map[String, String]] = rep(parametro) ^^ { _.toMap }
 
-  def parametro: Parser[(String, String)] = ident ~ "(" ~ valor ~ ")" ^^
-    { case k ~ "(" ~ v ~ ")" => k -> v }
+  def parametro: Parser[(String, String)] = ident ~ "(" ~ valor ~ ")" ^^ { case k ~ "(" ~ v ~ ")" => k -> v }
 
   def valor: Parser[String] = """(\w|\*)+""".r
   
@@ -56,9 +38,9 @@ class Parser extends JavaTokenParsers {
     }
   }
 
-  def parseOk(rs: List[Comando]) = {
+  def parseOk(rs: Seq[Comando]) = {
     println(rs)
-    rs map (_.check)
+//    rs map (_.check)
   }
 
 }
