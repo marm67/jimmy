@@ -28,18 +28,19 @@ object Parser extends JavaTokenParsers {
 
   def valor: Parser[String] = """(\w|\*)+""".r
   
-  def parseUno(s: String) = {
+  def apply(s: String) = {
     val S = s.toUpperCase
     val presult = parseAll(script, S)
     presult match {
-      case Success(r, n) => parseOk(r)
+      case Success(r, n) => parseOk( Script(r) )
       case Failure(msg, n) => println(presult)
       case Error(msg, n) => println(presult)
     }
   }
 
-  def parseOk(rs: Seq[Comando]) = {
-    println(rs)
+  def parseOk(rs: Script) = {
+//    println(rs)
+    Interpreter.execute(rs)
 //    rs map (_.check)
   }
 

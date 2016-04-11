@@ -4,32 +4,44 @@ import jimmy._
 import scala.annotation.tailrec
 import scala.collection.mutable
 
-object Interpreter {
+import grizzled.slf4j.Logging
 
-  class ScriptExecution(script: Script, globalContext: GlobalContext) {
-    def procesa = for (e <- script.comandos) procesaElemento(e)
+object Interpreter extends Logging {
 
-    private def procesaElemento(e: Comando): Unit = (e: @unchecked) match {
+//  private[this] val logger = org.log4s.getLogger
+
+  def execute(script: Script) = new ScriptExecution(script, new Contexto).execute
+
+  class ScriptExecution(script: Script, contexto: Contexto) {
+    def execute = for (e <- script.comandos) { 
+      logger.info( e.toString ) 
+      execComando(e) 
+    }
+
+    private def execComando(e: Comando): Unit = (e: @unchecked) match {
       case SET(variable, valor)  => procesaSet(variable, valor)
-//      case CEDA(servicio, parametros)  => procesaDefine(servicio, parametros)
+      case CEDA(op, recursot)  => procesaCeda(op, recursot)
     }
 
-    private def procesaSet(variable: String, valor: String) ={
-      globalContext.set(variable, valor)
+    private def procesaSet(variable: String, valor: String) = {
+      contexto.set(variable, valor)
     }
 
-    private def procesaDefine(servicio: String, parametros: Map[String, String]) ={
-      println("procesaDefine")
+    private def procesaCeda(op: String, rec: RecursoT) ={
+      println("procesaCeda")
     }
 
-    def execute(script: Script, globalContext: GlobalContext) = new ScriptExecution(script, globalContext).procesa
+    private def procesaCemt(op: String, rec: RecursoT) ={
+      println("procesaCemt")
+    }
+
   }
 
-  class GlobalContext(initVars: Map[String, Any] = Map.empty) {
+  class Contexto(initVars: Map[String, Any] = Map.empty) {
     private val _vars = mutable.Map[String, Any]() ++ initVars.map(e => e._1 -> e._2)
     def vars : Map[String,Any] = _vars.map(x => x._1 -> x._2).toMap
     def apply(n: String) = _vars.getOrElse(n, "")
-    def set(v: String, value: Any):Unit = _vars.put(v, value)
+    def set(v: String, value: Any): Unit = _vars.put(v, value)
   }
 
 }

@@ -7,6 +7,7 @@ import jimmy._
 import scala.io.Source
 import java.io.File
 // import main.java.CSSInliner
+import grizzled.slf4j.Logging
 
 case class CmdOpciones(
     config: File = new File("./jimmy.conf")
@@ -15,10 +16,14 @@ case class CmdOpciones(
   , script: String = ""
 )
 
-object Main { //extends App { //with CSSInliner {
+object Main extends Logging { //extends App { //with CSSInliner {
   // run -s "c:/scala/proyectos/jimmy/resources/ejemplos/script01" -c "c:/scala/proyectos/jimmy/resources/conf/app.conf" -u usuario -p password
   def main(args: Array[String]) {
-    if (loadConfig(args)) runScript()
+    if (loadConfig(args)) {
+      pruebaCmci()
+      // runScript()
+    }
+    //if (loadConfig(args)) runScript()
     //pruebaScript(args(0))
     //pruebaPlantillas()
     //pruebaConf()
@@ -28,6 +33,12 @@ object Main { //extends App { //with CSSInliner {
     //prueba
   }
 
+  def pruebaCmci() = {
+    val cmci = Cmci("produccion")
+    // cmci.setContext("CICSEATA")
+    println( cmci.getContext )
+  }
+  
   private def loadConfig(args: Array[String]): Boolean = {
     val parser = new scopt.OptionParser[CmdOpciones]("jimmy") {
       head("jimmy", "1.x")
@@ -53,22 +64,22 @@ object Main { //extends App { //with CSSInliner {
 
     if ( !new java.io.File(fscript).exists ) {
       val msg = s"""ERROR. No existe el fichero '$fscript'""" 
-      Console.err.println(msg)
+      logger.error(msg)
       System.exit(0)
     }
 
     /* test file readable */
     /* return exit code error (non zero) if a file is not readable */
     if ( !new java.io.File(fscript).canRead) {
-      println( s"""ERROR. El fichero no es legible '$fscript'""")
+      logger.error( s"""El fichero no es legible '$fscript'""")
       System.exit(0)
     }
 
     val script = Source.fromFile(fscript).mkString
-    println(script)
+    logger.info("Script:\n" + script + "**\n")
     
-    val p = new Parser
-    val query = p.parseUno(script)
+//    val p = new Parser
+    val query = Parser(script)
   }
 
   def prueba = {
@@ -95,8 +106,7 @@ object Main { //extends App { //with CSSInliner {
     val script = Source.fromFile(path).mkString.toUpperCase
     println(script.mkString)
     
-    val p = new Parser
-    val query = p.parseUno(script)
+    val query = Parser(script)
   }
 
   def pruebaAssembly() = {

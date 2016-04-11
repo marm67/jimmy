@@ -13,7 +13,13 @@ libraryDependencies ++= Seq(
 	"org.freemarker" % "freemarker" % "2.3.20",
 	"org.jsoup" % "jsoup" % "1.8.3",
 	"net.sourceforge.cssparser" % "cssparser" % "0.9.18",
-	"com.github.scopt" %% "scopt" % "3.4.0"
+	"com.github.scopt" %% "scopt" % "3.4.0",
+	"org.log4s" %% "log4s" % "1.2.1",
+	"org.slf4j" % "slf4j-api" % "1.7.10",
+	"org.slf4j" % "slf4j-simple" % "1.7.5",
+	"org.clapper" %% "grizzled-slf4j" % "1.0.2"
+	// "com.typesafe.scala-logging" % "scala-logging_2.11" % "3.1.0",
+	// "ch.qos.logback" %  "logback-classic" % "1.1.7",
 )
 
 scalacOptions in Test ++= Seq("-Yrangepos")
@@ -21,3 +27,5 @@ scalacOptions in Test ++= Seq("-Yrangepos")
 scalacOptions in ThisBuild ++= Seq("-unchecked", "-deprecation")
 
 // scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-language:implicitConversions")
+
+test in assembly := {}
