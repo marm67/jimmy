@@ -21,12 +21,12 @@ object Main extends Logging { //extends App { //with CSSInliner {
   def main(args: Array[String]) {
     if (loadConfig(args)) {
       pruebaCmci()
-      // runScript()
+      //pruebaConfig()
+      //runScript()
     }
     //if (loadConfig(args)) runScript()
     //pruebaScript(args(0))
     //pruebaPlantillas()
-    //pruebaConf()
     //pruebaAssembly()
     //pruebaConfEntornos()
     //pruebaReglas()
@@ -34,11 +34,17 @@ object Main extends Logging { //extends App { //with CSSInliner {
   }
 
   def pruebaCmci() = {
-    val cmci = Cmci("produccion")
+    val cmci = Cmci("SIST").scope("CICSJCOA").tabla("CICSLocalTransaction")
     // cmci.setContext("CICSEATA")
-    println( cmci.getContext )
+    println( cmci.uri )
   }
   
+  def pruebaConfig() = {
+    val config = Config.getConfig
+    println(config)
+    println(config.getString("app.path.plantillas"))
+  }
+
   private def loadConfig(args: Array[String]): Boolean = {
     val parser = new scopt.OptionParser[CmdOpciones]("jimmy") {
       head("jimmy", "1.x")
@@ -60,7 +66,7 @@ object Main extends Logging { //extends App { //with CSSInliner {
   }
 
   private def runScript() = {
-    val fscript = Config("script")
+    val fscript = Config("script").get
 
     if ( !new java.io.File(fscript).exists ) {
       val msg = s"""ERROR. No existe el fichero '$fscript'""" 

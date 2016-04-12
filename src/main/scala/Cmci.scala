@@ -1,48 +1,105 @@
 package jimmy
 
+//------------------------------------------------------------------------------------
+// Ejemplos de url
+//------------------------------------------------------------------------------------
+// http://10.145.254.228:8632/CICSSystemManagement/CICSLocalTransaction/JPLX1/CICSJCOA//10?CRITERIA=(TRANID=XA*)
+// http://10.145.254.228:8632/CICSSystemManagement/CICSLocalTransaction/JPLX1/CICSJCOA?CRITERIA=(TRANID=X*)&SUMMONLY
+//
+// http://10.145.254.228:8632/CICSSystemManagement/CICSLocalFile/JPLX1/JPLX1/?CRITERIA=(FILE=EQ* AND ENABLESTATUS=UNENABLED)
+//
+// http://10.145.254.228:8632/CICSSystemManagement/CICSDefinitionTransaction/JPLX1/CICSJCOA?CRITERIA=(NAME=XALA)&PARAMETER=CSDGROUP(XXTR00L)
+// http://10.145.254.228:8632/CICSSystemManagement/CICSDefinitionTransaction/JPLX1/CICSJCOA?CRITERIA=(NAME=X*)&PARAMETER=CSDGROUP(XXTR00L)
+// http://10.145.254.228:8632/CICSSystemManagement/CICSDefinitionTransaction/JPLX1/CICSJCOA?PARAMETER=CSDGROUP(DFHEDF)
+//
+// http://10.145.254.228:8632/CICSSystemManagement/CICSDefinitionFile/JPLX1/CICSJCOA?CRITERIA=(NAME=NAGRBATK)&PARAMETER=CSDGROUP(NAGRUPOA)
+
+//------------------------------------------------------------------------------------
+// Forma de invocacion
+//------------------------------------------------------------------------------------
+// 	$cmci->entorno('sistemas')
+// 		 ->tabla('CICSLocalFile')
+// 		 ->scope('CICSJCOA')
+// 		 ->criteria('NAME=XALA')
+// 		 ->parameter('CSDGROUP(XXTR00L)')
+// 	;
+//  $recursos = $cmci->doGet();
+
 object Cmci {
 	def apply(entorno: String): Cmci = {
-		val usuario: String  = Config("usuario")
-		val password: String = Config("password")
+		val usuario: String  = Config("usuario").get
+		val password: String = Config("password").get
 		new Cmci(entorno, usuario, password)
 	}
 }
 
+case class UriMap(
+	  host: Option[String]
+	, port: Option[String]
+	, context: Option[String]
+	, scope: Option[String]
+	, tabla: Option[String]
+	, limit: Option[String]
+	, groupBy: Option[String]
+	, criteria: Option[String]
+	, parameter: Option[String]
+)
+
 class Cmci(entorno: String, usuario: String, password: String) {
 
-	private val protocolo                 = "http"
-	private val csm                       = "CICSSystemManagement"
-	
-	private val host: String              = Config(s"cmci.$entorno.host")
-	private val port: String              = Config(s"cmci.$entorno.port")
-	private val defaultContext: String    = Config(s"cmci.$entorno.context")
-	private val defaultScope: String      = Config(s"cmci.$entorno.scope")
-	private val defaultLimit: String      = ???
-	
-	private var context: Option[String]   = None
-	private var scope: Option[String]     = None
-	private var tabla: Option[String]     = None
-	private var limit: Option[String]     = None
-	private var groupBy: Option[String]   = None
-	private var criteria: Option[String]  = None
-	private var parameter: Option[String] = None
+	val vars: scala.collection.mutable.LinkedHashMap[String, Option[String]]  = scala.collection.mutable.LinkedHashMap(
+		  "protocolo" 	-> Some("http")
+		, "host" 		-> Config(s"cmci.$entorno.host")
+		, "port" 		-> Config(s"cmci.$entorno.port")
+		, "csm" 		-> Some("CICSSystemManagement")
+		, "tabla" 		-> None
+		, "context" 	-> Config(s"cmci.$entorno.context")
+		, "scope" 		-> Config(s"cmci.$entorno.scope")
+		, "_limit" 		-> None
+		, "_groupBy" 	-> None
+		, "_criteria" 	-> None
+		, "_parameter" 	-> None
+	)
 
-	def uriBase: String = s"""$protocolo://$host:$port/$csm"""
+	def context(c: String): Cmci   = { vars("context")	 = Some(c); this }
+	def scope(c: String): Cmci     = { vars("scope")	 = Some(c); this }
+	def tabla(c: String): Cmci     = { vars("tabla")	 = Some(c); this }
+	def limit(c: String): Cmci     = { vars("limit")	 = Some(c); this }
+	def groupBy(c: String): Cmci   = { vars("groupBy")	 = Some(c); this }
+	def criteria(c: String): Cmci  = { vars("criteria")	 = Some(c); this }
+	def parameter(c: String): Cmci = { vars("parameter") = Some(c); this }
 
-	def setContext(c: String): Unit   = context = Some(c)
-	def getContext(): String          = context.getOrElse(defaultContext)
-	def setScope(c: String): Unit     = scope = Some(c)
-	def getScope(): String            = scope.getOrElse(defaultScope)
-	def setTabla(c: String): Unit     = tabla = Some(c)
-	def getTabla(): String            = tabla.getOrElse(defaultTabla)
-	def setLimit(c: String): Unit     = limit = Some(c)
-	def getLimit(): String            = limit.getOrElse(defaultLimit)
-	def setGroupBy(c: String): Unit   = groupBy = Some(c)
-	def getGroupBy(): String          = groupBy.getOrElse(defaultGroupBy)
-	def setCriteria(c: String): Unit  = criteria = Some(c)
-	def getCriteria(): String         = criteria.getOrElse(defaultCriteria)
-	def setParameter(c: String): Unit = parameter = Some(c)
-	def getParameter(): String        = parameter.getOrElse(defaultParameter)
+	def context(): Option[String]   = vars("context")
+	def scope(): Option[String]     = vars("scope")
+	def tabla(): Option[String]     = vars("tabla")
+	def limit(): Option[String]     = vars("limit")
+	def groupBy(): Option[String]   = vars("groupBy")
+	def criteria(): Option[String]  = vars("criteria")
+	def parameter(): Option[String] = vars("parameter")
+
+	//def uriBase: String = s"""$protocolo://$host:$port/$csm"""
+	def uri = {
+		//s"""$protocolo://$host:$port/$csm"""
+		vars.values map { k => k match {
+				case Some(v) => v
+				case _ 		 => None
+			}
+		}
+		// .map{ _ match { 
+		//   case Some(x) => x
+		//   case None => None
+		// }}
+		//.mkString("/")
+
+		// http://10.145.254.228:8632/CICSSystemManagement/CICSLocalTransaction/JPLX1/CICSJCOA//10?CRITERIA=(TRANID=XA*)
+		// http://10.145.254.228:8632/CICSSystemManagement/CICSLocalTransaction/JPLX1/CICSJCOA
+		// s"""${uriBase}/${tabla}/${context}/${scope}?${criteria}&${parameter}"""
+		// var kk = s"""$protocolo://$host:$port/$csm"""
+		// tabla match {
+		// 	case Some(t)	=>  kk += s"/$t"
+		// 	case None		=>  kk
+		// }
+	}
 
 	def scalajCmci() {
 		var url = "http://10.145.254.228:8632/CICSSystemManagement/CICSLocalTransaction/JPLX1/CICSJCOA//10?CRITERIA=(TRANID=XA*)"

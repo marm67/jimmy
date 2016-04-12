@@ -1,0 +1,3 @@
+set f = from  cemt i trans(xala)
+from prod.**.tores
+	select * from f
