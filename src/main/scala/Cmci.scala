@@ -85,6 +85,31 @@ class Cmci(entorno: String, usuario: String, password: String) {
 				case _ 		 => None
 			}
 		}
+
+		// val requeridos = vars.filterKeys(! _.startsWith("_") )
+		// val opcionales = vars.filterKeys(  _.startsWith("_") )
+
+		val (opcionales, requeridos) = vars partition ( _._1.startsWith("_") )
+		val lista = requeridos.values.toList
+		println(lista)
+		val kk: List[String] = lista.foldLeft (List[String]()) { (acum: List[String], v: Option[String]) =>
+			v match {
+				case None		=> Nil
+				case Some(x)	=> x :: acum
+			}
+		}
+		kk
+		val kk1: Option[String] = lista.foldLeft (Some("")) { (acum: Option[String], v: Option[String]) =>
+			acum match {
+				case None		=> None
+				case Some(x)	=> v match {
+					case Some(y) => Some(x + y)
+					case None => None
+				}
+				
+			}
+		}
+		kk1
 		// .map{ _ match { 
 		//   case Some(x) => x
 		//   case None => None

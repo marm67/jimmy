@@ -17,7 +17,8 @@ case class CmdOpciones(
 )
 
 object Main extends Logging { //extends App { //with CSSInliner {
-  // run -s "c:/scala/proyectos/jimmy/resources/ejemplos/script01" -c "c:/scala/proyectos/jimmy/resources/conf/app.conf" -u usuario -p password
+  // run -s "f:/scala/proyectos/jimmy/resources/ejemplos/script01" -c "f:/scala/proyectos/jimmy/resources/conf/app.conf" -u u -p p
+  // run -s "c:/scala/proyectos/jimmy/resources/ejemplos/script01" -c "c:/scala/proyectos/jimmy/resources/conf/app.conf" -u u -p p
   def main(args: Array[String]) {
     if (loadConfig(args)) {
       pruebaCmci()
@@ -34,7 +35,7 @@ object Main extends Logging { //extends App { //with CSSInliner {
   }
 
   def pruebaCmci() = {
-    val cmci = Cmci("SIST").scope("CICSJCOA").tabla("CICSLocalTransaction")
+    val cmci = Cmci("SIST").scope("CICSJCOA") //.tabla("CICSLocalTransaction")
     // cmci.setContext("CICSEATA")
     println( cmci.uri )
   }
