@@ -17,13 +17,13 @@ package jimmy
 //------------------------------------------------------------------------------------
 // Forma de invocacion
 //------------------------------------------------------------------------------------
-// 	$cmci->entorno('sistemas')
-// 		 ->tabla('CICSLocalFile')
-// 		 ->scope('CICSJCOA')
-// 		 ->criteria('NAME=XALA')
-// 		 ->parameter('CSDGROUP(XXTR00L)')
-// 	;
-//  $recursos = $cmci->doGet();
+// 	val cmci = Cmci("SIST")
+// 				.scope("CICSJCOA")
+// 				.tabla("CICSLocalTransaction")
+// 				.limit(10)
+// 				.criteria("TRANID=XA*")
+// 				
+//  val recursos = cmci.doGet()
 
 object Cmci {
 	def apply(entorno: String): Cmci = {
@@ -32,18 +32,6 @@ object Cmci {
 		new Cmci(entorno, usuario, password)
 	}
 }
-
-case class UriMap(
-	  host: Option[String]
-	, port: Option[String]
-	, context: Option[String]
-	, scope: Option[String]
-	, tabla: Option[String]
-	, limit: Option[String]
-	, groupBy: Option[String]
-	, criteria: Option[String]
-	, parameter: Option[String]
-)
 
 class Cmci(entorno: String, usuario: String, password: String) {
 
@@ -64,71 +52,57 @@ class Cmci(entorno: String, usuario: String, password: String) {
 	def context(c: String): Cmci   = { vars("context")	 = Some(c); this }
 	def scope(c: String): Cmci     = { vars("scope")	 = Some(c); this }
 	def tabla(c: String): Cmci     = { vars("tabla")	 = Some(c); this }
-	def limit(c: String): Cmci     = { vars("limit")	 = Some(c); this }
-	def groupBy(c: String): Cmci   = { vars("groupBy")	 = Some(c); this }
-	def criteria(c: String): Cmci  = { vars("criteria")	 = Some(c); this }
-	def parameter(c: String): Cmci = { vars("parameter") = Some(c); this }
+	def limit(c: String): Cmci     = { vars("_limit")	 = Some(c); this }
+	def limit(c: Int): Cmci    	   = { vars("_limit")	 = Some(c.toString); this }
+	def groupBy(c: String): Cmci   = { vars("_groupBy")	 = Some(c); this }
+	def criteria(c: String): Cmci  = { vars("_criteria") = Some(c); this }
+	def parameter(c: String): Cmci = { vars("_parameter") = Some(c); this }
 
 	def context(): Option[String]   = vars("context")
 	def scope(): Option[String]     = vars("scope")
 	def tabla(): Option[String]     = vars("tabla")
-	def limit(): Option[String]     = vars("limit")
-	def groupBy(): Option[String]   = vars("groupBy")
-	def criteria(): Option[String]  = vars("criteria")
-	def parameter(): Option[String] = vars("parameter")
+	def limit(): Option[String]     = vars("_limit")
+	def groupBy(): Option[String]   = vars("_groupBy")
+	def criteria(): Option[String]  = vars("_criteria")
+	def parameter(): Option[String] = vars("_parameter")
 
-	//def uriBase: String = s"""$protocolo://$host:$port/$csm"""
-	def uri = {
-		//s"""$protocolo://$host:$port/$csm"""
-		vars.values map { k => k match {
-				case Some(v) => v
-				case _ 		 => None
-			}
+	def uri(): Option[String] = {
+		val (opcionales, requeridos) = vars partition ( _._1.startsWith("_") )	
+
+		//comprobar que todos los valores requeridos estan resueltos
+		val valores = requeridos.values
+		val total = valores.size
+		val resueltos = valores.flatten.size
+		if ( total > resueltos) {
+			//logger.error("...")
+			None
+		}
+		else {
+			val List(_protocolo, _host, _port, _csm, _tabla, _context, _scope) = valores.flatten
+			var _uri = s"""${_protocolo}://${_host}:${_port}/${_csm}/${_tabla}/${_context}/${_scope}"""
+			if ( limit().isDefined ) 		_uri += s"""//${limit().get}"""	
+			if ( criteria().isDefined ) 	_uri += s"""?CRITERIA=(${criteria().get})"""	
+			if ( parameter().isDefined ) 
+			{
+				if ( criteria().isDefined ) _uri += s"""&PARAMETER=(${parameter().get})"""
+				else 						_uri += s"""?PARAMETER=(${parameter().get})"""	
+			}	
+			Some(_uri)
 		}
 
-		// val requeridos = vars.filterKeys(! _.startsWith("_") )
-		// val opcionales = vars.filterKeys(  _.startsWith("_") )
-
-		val (opcionales, requeridos) = vars partition ( _._1.startsWith("_") )
-		val lista = requeridos.values.toList
-		println(lista)
-		val kk: List[String] = lista.foldLeft (List[String]()) { (acum: List[String], v: Option[String]) =>
-			v match {
-				case None		=> Nil
-				case Some(x)	=> x :: acum
-			}
-		}
-		kk
-		val kk1: Option[String] = lista.foldLeft (Some("")) { (acum: Option[String], v: Option[String]) =>
-			acum match {
-				case None		=> None
-				case Some(x)	=> v match {
-					case Some(y) => Some(x + y)
-					case None => None
-				}
-				
-			}
-		}
-		kk1
-		// .map{ _ match { 
-		//   case Some(x) => x
-		//   case None => None
-		// }}
-		//.mkString("/")
-
-		// http://10.145.254.228:8632/CICSSystemManagement/CICSLocalTransaction/JPLX1/CICSJCOA//10?CRITERIA=(TRANID=XA*)
-		// http://10.145.254.228:8632/CICSSystemManagement/CICSLocalTransaction/JPLX1/CICSJCOA
-		// s"""${uriBase}/${tabla}/${context}/${scope}?${criteria}&${parameter}"""
-		// var kk = s"""$protocolo://$host:$port/$csm"""
-		// tabla match {
-		// 	case Some(t)	=>  kk += s"/$t"
-		// 	case None		=>  kk
-		// }
 	}
 
-	def scalajCmci() {
-		var url = "http://10.145.254.228:8632/CICSSystemManagement/CICSLocalTransaction/JPLX1/CICSJCOA//10?CRITERIA=(TRANID=XA*)"
-    	val response = ScalaJ(url, "_usuario", "_password")
+	def doGet() {
+		uri() match {
+			case Some(x) => {
+    			val response = ScalaJ(x, usuario, password)
+    			response
+			}
+			case None	=> {
+				//logger.error("...")
+				//None
+			}
+		}
       	//println(response.asParamMap)
 
   //   	println("---> response.body")

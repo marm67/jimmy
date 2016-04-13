@@ -21,6 +21,7 @@ object Main extends Logging { //extends App { //with CSSInliner {
   // run -s "c:/scala/proyectos/jimmy/resources/ejemplos/script01" -c "c:/scala/proyectos/jimmy/resources/conf/app.conf" -u u -p p
   def main(args: Array[String]) {
     if (loadConfig(args)) {
+      //prueba
       pruebaCmci()
       //pruebaConfig()
       //runScript()
@@ -34,10 +35,45 @@ object Main extends Logging { //extends App { //with CSSInliner {
     //prueba
   }
 
+  def prueba() = {
+    val entorno = "SIST"
+    val vars: scala.collection.mutable.LinkedHashMap[String, Option[String]]  = scala.collection.mutable.LinkedHashMap(
+        "protocolo"   -> Some("http")
+      , "host"    -> Config(s"cmci.$entorno.host")
+      , "port"    -> Config(s"cmci.$entorno.port")
+      , "csm"     -> Some("CICSSystemManagement")
+      , "tabla"     -> None
+      , "context"   -> Config(s"cmci.$entorno.context")
+      , "scope"     -> Config(s"cmci.$entorno.scope")
+      , "_limit"    -> None
+      , "_groupBy"  -> None
+      , "_criteria"   -> None
+      , "_parameter"  -> None
+    )
+
+    val (opcionales, requeridos) = vars partition ( _._1.startsWith("_") )  
+    println(requeridos)
+
+    val valores = requeridos.values
+    println(valores)
+
+    var acum = valores.find( _ == None).size
+//    for ( v1 <- requeridos.values.toList ; v <- v1) {yield concatenar(acum, v)}
+    println(valores.size)
+    println(valores.flatten.size)
+    
+    for ( (clave, valorOption) <- requeridos ; valor <- valorOption ) yield valor
+
+    val listOfOptions = List(Some("4"), None, Some("9"))
+    val kk1 = listOfOptions.flatMap(o => o)
+    println(kk1)
+
+  }
+  
   def pruebaCmci() = {
-    val cmci = Cmci("SIST").scope("CICSJCOA") //.tabla("CICSLocalTransaction")
+    val cmci = Cmci("SIST").scope("CICSJCOA").tabla("CICSLocalTransaction").limit(10).criteria("TRANID=XA*")
     // cmci.setContext("CICSEATA")
-    println( cmci.uri )
+    println( cmci.doGet() )
   }
   
   def pruebaConfig() = {
@@ -89,7 +125,7 @@ object Main extends Logging { //extends App { //with CSSInliner {
     val query = Parser(script)
   }
 
-  def prueba = {
+  def prueba1 = {
     import com.typesafe.config.ConfigFactory
     val osName = ConfigFactory.load().getString("os.name")
     println(osName)
