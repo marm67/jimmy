@@ -28,3 +28,36 @@ object ScalaJ {
 		MyHttp(url).auth(username, password)
 	}
 }
+
+
+//println(response.asParamMap)
+
+//println("---> response.body")
+//println(response.body)
+//println(" ")
+// println("---> response.code")
+// println(response.code)
+// println(" ")
+// println("---> response.headers")
+// println(response.headers)
+// println(" ")
+// println("---> response.cookies")
+// println(response.cookies)
+// println(" ")
+
+// http://alvinalexander.com/scala/how-to-extract-data-from-xml-nodes-in-scala
+// http://www.scala-lang.org/api/current/scala-xml/
+
+// val body = scala.xml.XML.loadString(response.asString.body)
+
+// val resultsummary = ( (body \ "resultsummary").head ).attributes.asAttrMap
+// //println( resultsummary("api_response1_alt") )
+
+// val records = (body \ "records").head.child.map(_.attributes.asAttrMap).filter(_.size > 0)
+//println(records)
+
+// val kk = for ( r <- (body \ "records").head.child if r.size > 0 ) {
+// 	r.attributes.asAttrMap ++ ("label", r.label)
+// } 
+// println(kk)
+

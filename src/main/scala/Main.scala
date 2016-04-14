@@ -21,10 +21,8 @@ object Main extends Logging { //extends App { //with CSSInliner {
   // run -s "c:/scala/proyectos/jimmy/resources/ejemplos/script01" -c "c:/scala/proyectos/jimmy/resources/conf/app.conf" -u u -p p
   def main(args: Array[String]) {
     if (loadConfig(args)) {
-      //prueba
-      pruebaCmci()
-      //pruebaConfig()
-      //runScript()
+      //pruebaCmciPost
+      pruebaCmciDelete
     }
     //if (loadConfig(args)) runScript()
     //pruebaScript(args(0))
@@ -35,45 +33,38 @@ object Main extends Logging { //extends App { //with CSSInliner {
     //prueba
   }
 
-  def prueba() = {
-    val entorno = "SIST"
-    val vars: scala.collection.mutable.LinkedHashMap[String, Option[String]]  = scala.collection.mutable.LinkedHashMap(
-        "protocolo"   -> Some("http")
-      , "host"    -> Config(s"cmci.$entorno.host")
-      , "port"    -> Config(s"cmci.$entorno.port")
-      , "csm"     -> Some("CICSSystemManagement")
-      , "tabla"     -> None
-      , "context"   -> Config(s"cmci.$entorno.context")
-      , "scope"     -> Config(s"cmci.$entorno.scope")
-      , "_limit"    -> None
-      , "_groupBy"  -> None
-      , "_criteria"   -> None
-      , "_parameter"  -> None
-    )
+  def pruebaCmciGet = {
+    val cmci = Cmci("SIST").scope("CICSJCOA").tabla("CICSLocalTransaction").limit(10).criteria("TRANID=XA*")
+    val response = cmci.doGet.get
 
-    val (opcionales, requeridos) = vars partition ( _._1.startsWith("_") )  
-    println(requeridos)
+    val body = response.body
+    println(response.records)
+  }
 
-    val valores = requeridos.values
-    println(valores)
+  def pruebaCmciPost = {
+    val cmci = Cmci("SIST").scope("CICSJCOA").tabla("CICSDefinitionTransaction")
+    val xml = """<request><create><parameter name="CSD"/><attributes name="MIKE" program="POST" csdgroup="JIMMY"/></create></request>"""
 
-    var acum = valores.find( _ == None).size
-//    for ( v1 <- requeridos.values.toList ; v <- v1) {yield concatenar(acum, v)}
-    println(valores.size)
-    println(valores.flatten.size)
-    
-    for ( (clave, valorOption) <- requeridos ; valor <- valorOption ) yield valor
+    println(cmci.uri)
+    val response = cmci.doPost(xml).get
+    println(response.response)
+  }
 
-    val listOfOptions = List(Some("4"), None, Some("9"))
-    val kk1 = listOfOptions.flatMap(o => o)
-    println(kk1)
+  def pruebaCmciPut = {
+    val cmci = Cmci("SIST").scope("CICSJCOA").tabla("CICSDefinitionTransaction").criteria("NAME=MIKE").parameter("CSDGROUP(JIMMY)")
+    val xml = """<request><update><attributes program="PUT"/></update></request>"""
 
+    println(cmci.uri)
+    val response = cmci.doPut(xml).get
+    println(response.response)
   }
   
-  def pruebaCmci() = {
-    val cmci = Cmci("SIST").scope("CICSJCOA").tabla("CICSLocalTransaction").limit(10).criteria("TRANID=XA*")
-    // cmci.setContext("CICSEATA")
-    println( cmci.doGet() )
+  def pruebaCmciDelete() = {
+    val cmci = Cmci("SIST").scope("CICSJCOA").tabla("CICSDefinitionTransaction").criteria("NAME=MIKE").parameter("CSDGROUP(JIMMY)")
+    println(cmci.uri)
+
+    val response = cmci.doDelete.get
+    println(response.response)
   }
   
   def pruebaConfig() = {

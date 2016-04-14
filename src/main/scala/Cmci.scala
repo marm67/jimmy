@@ -1,5 +1,9 @@
 package jimmy
 
+import scalaj.http._
+import java.net.Proxy
+
+
 //------------------------------------------------------------------------------------
 // Ejemplos de url
 //------------------------------------------------------------------------------------
@@ -25,15 +29,82 @@ package jimmy
 // 				
 //  val recursos = cmci.doGet()
 
-object Cmci {
-	def apply(entorno: String): Cmci = {
-		val usuario: String  = Config("usuario").get
-		val password: String = Config("password").get
-		new Cmci(entorno, usuario, password)
+object MyHttp extends BaseHttp (
+  proxyConfig = Some(java.net.Proxy.NO_PROXY),
+  charset = HttpConstants.utf8
+)	
+
+class CmciResponse(request: HttpRequest) {
+	val response      = request.asString
+	
+	println(response)
+
+	val code          = response.code
+	def headers       = response.headers	
+	def cookies       = response.cookies
+
+	// http://alvinalexander.com/scala/how-to-extract-data-from-xml-nodes-in-scala
+	// http://www.scala-lang.org/api/current/scala-xml/
+	val body          = scala.xml.XML.loadString(response.body)
+	val resultsummary = (body \ "resultsummary").head.attributes.asAttrMap
+	val records       = _records()
+
+	private def _records() = {
+		val _bodyrecords  = (body \ "records").head.child
+		val _records      = _bodyrecords.map(_.attributes.asAttrMap).filter(_.size > 0)
+		val _label        = _bodyrecords.map(_.label).filterNot(_.contains("#PCDATA")).head
+
+		for { r <- _records } yield Record(_label, r)
 	}
 }
 
+case class Record(tipo: String, props: Map[String,String])
+
 class Cmci(entorno: String, usuario: String, password: String) {
+
+	def doGet: Option[CmciResponse] = {
+		// val cmci = Cmci("SIST").scope("CICSJCOA").tabla("CICSLocalTransaction").limit(10).criteria("TRANID=XA*")
+	    val _uri = uri
+	    if ( _uri.isDefined ) {
+	    	val request  = MyHttp(_uri.get).auth(usuario, password)
+			val response = new CmciResponse(request)
+	    	Some(response)
+	    }
+	    else None
+	}
+
+	def doPost(xml: String): Option[CmciResponse] = {
+		// val cmci = Cmci("SIST").scope("CICSJCOA").tabla("CICSDefinitionTransaction")
+	    val _uri = uri
+	    if ( _uri.isDefined ) {
+	    	val request  = MyHttp(_uri.get).auth(usuario, password).postData(xml).method("post").header("content-type", "application/xml")
+			val response = new CmciResponse(request)
+	    	Some(response)
+	    }
+	    else None
+	}
+
+	def doPut(xml: String): Option[CmciResponse] = {
+		// val cmci = Cmci("SIST").scope("CICSJCOA").tabla("CICSDefinitionTransaction").criteria("NAME=MIKE").parameter("CSDGROUP(JIMMY)")
+	    val _uri = uri
+	    if ( _uri.isDefined ) {
+	    	val request  = MyHttp(_uri.get).auth(usuario, password).postData(xml).method("put").header("content-type", "application/xml")
+			val response = new CmciResponse(request)
+	    	Some(response)
+	    }
+	    else None
+	}
+
+	def doDelete: Option[CmciResponse] = {
+		// val cmci = Cmci("SIST").scope("CICSJCOA").tabla("CICSDefinitionTransaction").criteria("NAME=MIKE").parameter("CSDGROUP(JIMMY)")
+	    val _uri = uri
+	    if ( _uri.isDefined ) {
+	    	val request  = MyHttp(_uri.get).auth(usuario, password).method("delete")
+			val response = new CmciResponse(request)
+	    	Some(response)
+	    }
+	    else None
+	}
 
 	val vars: scala.collection.mutable.LinkedHashMap[String, Option[String]]  = scala.collection.mutable.LinkedHashMap(
 		  "protocolo" 	-> Some("http")
@@ -66,7 +137,7 @@ class Cmci(entorno: String, usuario: String, password: String) {
 	def criteria(): Option[String]  = vars("_criteria")
 	def parameter(): Option[String] = vars("_parameter")
 
-	def uri(): Option[String] = {
+	def uri: Option[String] = {
 		val (opcionales, requeridos) = vars partition ( _._1.startsWith("_") )	
 
 		//comprobar que todos los valores requeridos estan resueltos
@@ -84,57 +155,19 @@ class Cmci(entorno: String, usuario: String, password: String) {
 			if ( criteria().isDefined ) 	_uri += s"""?CRITERIA=(${criteria().get})"""	
 			if ( parameter().isDefined ) 
 			{
-				if ( criteria().isDefined ) _uri += s"""&PARAMETER=(${parameter().get})"""
-				else 						_uri += s"""?PARAMETER=(${parameter().get})"""	
+				if ( criteria().isDefined ) _uri += s"""&PARAMETER=${parameter().get}"""
+				else 						_uri += s"""?PARAMETER=${parameter().get}"""	
 			}	
 			Some(_uri)
 		}
 
 	}
+}
 
-	def doGet() {
-		uri() match {
-			case Some(x) => {
-    			val response = ScalaJ(x, usuario, password)
-    			response
-			}
-			case None	=> {
-				//logger.error("...")
-				//None
-			}
-		}
-      	//println(response.asParamMap)
-
-  //   	println("---> response.body")
-  //   	println(response.body)
-  //   	println(" ")
-		// println("---> response.code")
-		// println(response.code)
-		// println(" ")
-		// println("---> response.headers")
-		// println(response.headers)
-		// println(" ")
-		// println("---> response.cookies")
-		// println(response.cookies)
-		// println(" ")
-
-      	// http://alvinalexander.com/scala/how-to-extract-data-from-xml-nodes-in-scala
-      	// http://www.scala-lang.org/api/current/scala-xml/
-      	
-      	val body = scala.xml.XML.loadString(response.asString.body)
-
-      	val resultsummary = ( (body \ "resultsummary").head ).attributes.asAttrMap
-      	//println( resultsummary("api_response1_alt") )
-
-      	val records = (body \ "records").head.child.map(_.attributes.asAttrMap).filter(_.size > 0)
-      	//println(records)
-
-      	// val kk = for ( r <- (body \ "records").head.child if r.size > 0 ) {
-      	// 	r.attributes.asAttrMap ++ ("label", r.label)
-      	// } 
-      	// println(kk)
-
-
+object Cmci {
+	def apply(entorno: String): Cmci = {
+		val usuario: String  = Config("usuario").get
+		val password: String = Config("password").get
+		new Cmci(entorno, usuario, password)
 	}
-
 }
