@@ -21,8 +21,8 @@ object Main extends Logging { //extends App { //with CSSInliner {
   // run -s "c:/scala/proyectos/jimmy/resources/ejemplos/script01" -c "c:/scala/proyectos/jimmy/resources/conf/app.conf" -u u -p p
   def main(args: Array[String]) {
     if (loadConfig(args)) {
-      //pruebaCmciPost
-      pruebaCmciDelete
+      //pruebaCmciGet
+      pruebaCics
     }
     //if (loadConfig(args)) runScript()
     //pruebaScript(args(0))
@@ -31,6 +31,11 @@ object Main extends Logging { //extends App { //with CSSInliner {
     //pruebaConfEntornos()
     //pruebaReglas()
     //prueba
+  }
+
+  def pruebaCics = {
+    Cics("CICSJCOA").inquire( "TRAN"->"X*", "PROGRAM"->"XABENDCO")
+    // Cics("CICSJCOA").inquire.TRAN("X*").PROGRAM("XABENDCO")
   }
 
   def pruebaCmciGet = {
@@ -43,7 +48,7 @@ object Main extends Logging { //extends App { //with CSSInliner {
 
   def pruebaCmciPost = {
     val cmci = Cmci("SIST").scope("CICSJCOA").tabla("CICSDefinitionTransaction")
-    val xml = """<request><create><parameter name="CSD"/><attributes name="MIKE" program="POST" csdgroup="JIMMY"/></create></request>"""
+    val xml = """<request><create><parameter name="CSD"/><attributes name="MIKE" program="POST" remotesystem="JCOB" csdgroup="JIMMY"/></create></request>"""
 
     println(cmci.uri)
     val response = cmci.doPost(xml).get
