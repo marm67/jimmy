@@ -1,4 +1,4 @@
-package main.java;
+package jimmy;
 
 // http://stackoverflow.com/questions/4521557/automatically-convert-style-sheets-to-inline-style
 
@@ -90,18 +90,19 @@ public class CSSInliner {
 
         for (Map.Entry<Element, Map<String, String>> elementEntry : allElementsStyles.entrySet()) {
             Element element = elementEntry.getKey();
-            StringBuilder builder = new StringBuilder();
-            for (Map.Entry<String, String> styleEntry : elementEntry.getValue().entrySet()) {
-                builder.append(styleEntry.getKey()).append(":").append(styleEntry.getValue()).append(";");
-            }
-            builder.append(element.attr("style"));
-            element.attr("style", builder.toString());
-            if (removeClasses) {
-                element.removeAttr("class");
+            // System.out.println("elementEntry: " + elementEntry.toString());
+            
+            for (Map.Entry<String, String> propiedadValor : elementEntry.getValue().entrySet()) {
+                String propiedad = propiedadValor.getKey();
+                String valor = propiedadValor.getValue();
+                // System.out.println("propiedad: " + propiedad);
+                // System.out.println("valor: " + valor);
+                
+                element.attr(propiedad, valor);
             }
         }
 
-        return document.html();
+        return document.body().html();
     }
 
 }

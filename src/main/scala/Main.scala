@@ -22,7 +22,7 @@ object Main extends Logging { //extends App { //with CSSInliner {
   def main(args: Array[String]) {
     if (loadConfig(args)) {
       //pruebaCmciGet
-      pruebaCics
+      pruebaReglas
     }
     //if (loadConfig(args)) runScript()
     //pruebaScript(args(0))
@@ -31,6 +31,21 @@ object Main extends Logging { //extends App { //with CSSInliner {
     //pruebaConfEntornos()
     //pruebaReglas()
     //prueba
+  }
+
+  def pruebaReglas = {
+    import java.io._
+
+    val xml = """<cicslocaltransaction tranclass="DFHTCL00" tranid="XALA" trprof="" twasize="0" usecount="57"/>"""
+    val pathReglas = """f:/scala/proyectos/jimmy/resources/reglas/rules.css"""
+
+    val xml1 = CSSInliner.inlineStyles(xml, new File(pathReglas), false)
+
+    //val xml1 = inlineStyles(xml, new File(pathReglas), false)
+
+    println(xml)
+    println(xml1)
+
   }
 
   def pruebaCics = {
@@ -127,19 +142,6 @@ object Main extends Logging { //extends App { //with CSSInliner {
     println(osName)
   }
   
-  def pruebaReglas() = {
-    // import java.io._
-
-    // val xml = """<cicslocaltransaction tranclass="DFHTCL00" tranid="XALA" trprof="" twasize="0" usecount="57"/>"""
-    // val pathReglas = """c:/scala/proyectos/jimmy/resources/reglas/rules.css"""
-
-    // val xml1 = inlineStyles(xml, new File(pathReglas), false)
-
-    // println(xml)
-    // println(xml1)
-
-  }
-
   def pruebaScript(s: String) = {
     val path = s"""c:/scala/proyectos/jimmy/resources/ejemplos/$s"""
     val script = Source.fromFile(path).mkString.toUpperCase

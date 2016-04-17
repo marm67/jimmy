@@ -1,1 +1,25 @@
-cicslocaltransaction { twa: 128; }
+cicslocaltransaction {
+    aplica : si ;
+    mecago : tambien;
+}
+
+cicslocaltransaction[ambito=tores] {
+    aplica : no ;
+    mecago : me cago en la leche ;
+}
+
+cicslocaltransaction { 
+    twasize: 128; 
+}
+
+/*
+
+// entorno.ambito.funcion
+
+produccion {
+    tores {
+        twasize: 0;
+    }
+}
+
+ */
