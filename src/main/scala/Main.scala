@@ -21,23 +21,59 @@ object Main extends Logging { //extends App { //with CSSInliner {
   // run -s "c:/scala/proyectos/jimmy/resources/ejemplos/script01" -c "c:/scala/proyectos/jimmy/resources/conf/app.conf" -u u -p p
   def main(args: Array[String]) {
     if (loadConfig(args)) {
-      //pruebaCmciGet
-      pruebaReglas
+      pruebaCics
     }
-    //if (loadConfig(args)) runScript()
-    //pruebaScript(args(0))
-    //pruebaPlantillas()
-    //pruebaAssembly()
-    //pruebaConfEntornos()
-    //pruebaReglas()
-    //prueba
+  }
+
+  def pruebaCics = {
+//    val records = Cics("cicsjcoa").inquire("CICSLocalTransaction").with("TRANID"->"X*") //, "PROGRAM"->"XALA01CO")
+//    val records = Cics("cicsjcoa").CICSLocalTransaction.tranid("X*").inquire
+
+    val rs = Cics("cicsjcoa").from("CICSLocalTransaction").where("TRANID=X* AND PROGRAM=XALA01CO").inquire
+    rs map { r => 
+      println( r.eyu_cicsname + " " + r.tranid + " " + r.program + " " + r.definesource )
+      r.set("PROGRAM" -> "VELO")
+    }
+
+    Target("sistemas.*.elis") foreach { cics =>
+      println( classOf[cics.getClass] )
+      //val rs = cics.from("CICSLocalTransaction") //.where("TRANID=XALA").inquire
+      // rs map { r => 
+      //   println( r.eyu_cicsname + " " + r.tranid + " " + r.program + " " + r.definesource )
+      //   r.set("PROGRAM" -> "VELO")
+      // }
+    }
+  }
+
+  def pruebaTarget = {
+    val selectores = List(
+        "produccion.atlas.elis.cicseli8"
+      , "produccion.atlas.elis"
+      , "produccion.atlas"
+      , "sistemas"
+      , "cicsjli1"
+      , "produccion.*.tores"
+      , "produccion.atlas.*.cicsel*"
+      , "cicselo*"
+    )
+
+    selectores foreach { selector => 
+      println("-")
+      println(selector)
+      val targets = Target(selector)
+      println(targets)
+      targets match {
+        case Some(x)  =>  println(x.size)
+        case None     =>  println("0")
+      }      
+    }
   }
 
   def pruebaReglas = {
     import java.io._
 
     val xml = """<cicslocaltransaction tranclass="DFHTCL00" tranid="XALA" trprof="" twasize="0" usecount="57"/>"""
-    val pathReglas = """f:/scala/proyectos/jimmy/resources/reglas/rules.css"""
+    val pathReglas = """c:/scala/proyectos/jimmy/resources/reglas/rules.css"""
 
     val xml1 = CSSInliner.inlineStyles(xml, new File(pathReglas), false)
 
@@ -48,16 +84,9 @@ object Main extends Logging { //extends App { //with CSSInliner {
 
   }
 
-  def pruebaCics = {
-    Cics("CICSJCOA").inquire( "TRAN"->"X*", "PROGRAM"->"XABENDCO")
-    // Cics("CICSJCOA").inquire.TRAN("X*").PROGRAM("XABENDCO")
-  }
-
   def pruebaCmciGet = {
     val cmci = Cmci("SIST").scope("CICSJCOA").tabla("CICSLocalTransaction").limit(10).criteria("TRANID=XA*")
-    val response = cmci.doGet.get
-
-    val body = response.body
+    val response = cmci.doGet
     println(response.records)
   }
 
@@ -65,26 +94,26 @@ object Main extends Logging { //extends App { //with CSSInliner {
     val cmci = Cmci("SIST").scope("CICSJCOA").tabla("CICSDefinitionTransaction")
     val xml = """<request><create><parameter name="CSD"/><attributes name="MIKE" program="POST" remotesystem="JCOB" csdgroup="JIMMY"/></create></request>"""
 
-    println(cmci.uri)
-    val response = cmci.doPost(xml).get
-    println(response.response)
+    // println(cmci.uri)
+    // val response = cmci.doPost(xml).get
+    // println(response.response)
   }
 
   def pruebaCmciPut = {
     val cmci = Cmci("SIST").scope("CICSJCOA").tabla("CICSDefinitionTransaction").criteria("NAME=MIKE").parameter("CSDGROUP(JIMMY)")
     val xml = """<request><update><attributes program="PUT"/></update></request>"""
 
-    println(cmci.uri)
-    val response = cmci.doPut(xml).get
-    println(response.response)
+    // println(cmci.uri)
+    // val response = cmci.doPut(xml).get
+    // println(response.response)
   }
   
   def pruebaCmciDelete() = {
     val cmci = Cmci("SIST").scope("CICSJCOA").tabla("CICSDefinitionTransaction").criteria("NAME=MIKE").parameter("CSDGROUP(JIMMY)")
     println(cmci.uri)
 
-    val response = cmci.doDelete.get
-    println(response.response)
+    // val response = cmci.doDelete.get
+    // println(response.response)
   }
   
   def pruebaConfig() = {
