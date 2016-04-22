@@ -168,12 +168,48 @@ class Cmci private(entorno: String, usuario: String, password: String) extends L
 //	private def escape(s: String): String = HttpConstants.urlEncode(s, HttpConstants.utf8 )
 	private def escape(s: String): String = CmciUtils.escape(s)
 
-}
+	object MiHttp extends BaseHttp (
+	  proxyConfig = Some(java.net.Proxy.NO_PROXY),
+	  charset = HttpConstants.utf8
+	)	
 
-object MiHttp extends BaseHttp (
-  proxyConfig = Some(java.net.Proxy.NO_PROXY),
-  charset = HttpConstants.utf8
-)	
+	object CmciUtils {
+		val tconv: Map[Char,String] = Map(
+			  ' ' -> "%20"
+			, '!' -> "%21" 
+			, '#' -> "%23" 
+			, '$' -> "%24" 
+			, '%' -> "%25" 
+			, '&' -> "%26" 
+			, ''' -> "%27" 
+			, '(' -> "%28" 
+			, ')' -> "%29" 
+			, '*' -> "%2A" 
+			, '+' -> "%2B" 
+			, ',' -> "%2C" 
+			, '-' -> "%2D"     
+			, '.' -> "%2E" 
+			, '/' -> "%2F" 
+			, ':' -> "%3A" 
+			, ';' -> "%3B" 
+			, '<' -> "%3C" 
+			, '=' -> "%3D" 
+			, '>' -> "%3E" 
+			, '?' -> "%3F" 
+			, '@' -> "%40" 
+			, '[' -> "%5B" 
+			, ']' -> "%5D" 
+			, '¬' -> "%AC" 
+		)
+
+		def escape(cadena: String): String = {
+			val x = scala.collection.mutable.ArrayBuffer[String]()
+			for ( ch1 <- cadena )  x += tconv.getOrElse(ch1, ch1.toString)
+			x.mkString
+		}
+
+	}
+}
 
 case class Record(tipo: String, props: Map[String,String])
 
@@ -223,39 +259,3 @@ class CmciResponse(request: HttpRequest) extends Logging with TCmciResponse {
 	}
 }
 
-object CmciUtils {
-	val tconv: Map[Char,String] = Map(
-		  ' ' -> "%20"
-		, '!' -> "%21" 
-		, '#' -> "%23" 
-		, '$' -> "%24" 
-		, '%' -> "%25" 
-		, '&' -> "%26" 
-		, ''' -> "%27" 
-		, '(' -> "%28" 
-		, ')' -> "%29" 
-		, '*' -> "%2A" 
-		, '+' -> "%2B" 
-		, ',' -> "%2C" 
-		, '-' -> "%2D"     
-		, '.' -> "%2E" 
-		, '/' -> "%2F" 
-		, ':' -> "%3A" 
-		, ';' -> "%3B" 
-		, '<' -> "%3C" 
-		, '=' -> "%3D" 
-		, '>' -> "%3E" 
-		, '?' -> "%3F" 
-		, '@' -> "%40" 
-		, '[' -> "%5B" 
-		, ']' -> "%5D" 
-		, '¬' -> "%AC" 
-	)
-
-	def escape(cadena: String): String = {
-		val x = scala.collection.mutable.ArrayBuffer[String]()
-		for ( ch1 <- cadena )  x += tconv.getOrElse(ch1, ch1.toString)
-		x.mkString
-	}
-
-}

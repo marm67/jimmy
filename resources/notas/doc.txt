@@ -1,0 +1,10 @@
+val rs = Target("sistemas").from("CICSLocalTransaction").where("TRANID=X* AND PROGRAM=XALA01CO").inquire
+val report = ListaRecursoCics(rs).print("eyu_cicsname", "tranid", "program", "definesource")
+println(report)
+
+
+Target("sistemas") 							-> ListaCics extends Queryable
+.from("CICSLocalTransaction") 				-> Queryable
+.where("TRANID=X* AND PROGRAM=XALA01CO") 	-> Queryable
+.inquire 									-> List[RecursoCics]
+.print

@@ -22,10 +22,10 @@ object Target {
 	}
 }
 
-class Target private {
+class Target private { self =>
 	lazy val mapa = setMapa
 
-	def get(path: String): Option[List[Cics]] = {
+	def get(path: String): ListaCics = {
 		val patron = path.replaceAll("""\*\*""", """(\*)""").replaceAll("""\.""", """\\.""").replaceAll("""\*""", """(\.\*)""")
 		val regexp = patron.r
 		val lista = mapa filter { x => 
@@ -35,13 +35,13 @@ class Target private {
 			}
 		}
 
-		if( lista.size == 0) None 
+		if( lista.size == 0) ListaCics(List())
 		else {
-			val lc = lista.sorted map { s => 
+			val cs = lista.sorted map { s => 
 				val Array(entorno, ambito, funcion, applid) = s.split('.')
 				Cics(entorno, applid)
 			}
-			Some(lc)
+			ListaCics(cs)
 		}
 	}
 	

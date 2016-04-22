@@ -21,27 +21,38 @@ object Main extends Logging { //extends App { //with CSSInliner {
   // run -s "c:/scala/proyectos/jimmy/resources/ejemplos/script01" -c "c:/scala/proyectos/jimmy/resources/conf/app.conf" -u u -p p
   def main(args: Array[String]) {
     if (loadConfig(args)) {
-      pruebaCics
+      pruebaTabulator
     }
+  }
+
+  def pruebaTabulator = {
+    val rs = Target("sistemas").from("CICSLocalTransaction").where("TRANID=X* AND PROGRAM=XALA01CO").inquire
+//    val report = ListaElementoCics(rs).print("eyu_cicsname", "tranid", "program", "definesource")
+    rs.print("eyu_cicsname", "tranid", "program", "definesource")
+  }
+
+  def pruebaListaCics = {
+    val rs = Target("sistemas.*.elis").from("CICSLocalTransaction").where("TRANID=X*").and("PROGRAM=XALA01CO").inquire
+    println(rs)
   }
 
   def pruebaCics = {
 //    val records = Cics("cicsjcoa").inquire("CICSLocalTransaction").with("TRANID"->"X*") //, "PROGRAM"->"XALA01CO")
 //    val records = Cics("cicsjcoa").CICSLocalTransaction.tranid("X*").inquire
-
-    val rs = Cics("cicsjcoa").from("CICSLocalTransaction").where("TRANID=X* AND PROGRAM=XALA01CO").inquire
+//    val rs = Cics("cicsjcoa").from("CICSLocalTransaction").where("TRANID=X* AND PROGRAM=XALA01CO").inquire
+//    val rs = Cics("cicsjcoa").sql("SELECT eyu_cicsname, tranid, program, definesource FROM CICSLocalTransaction WHERE TRANID=X* AND PROGRAM=XALA01CO")
+    
+    val rs = Cics("cicsjcoa").from("CICSLocalTransaction").where("TRANID=X*").and("PROGRAM=XALA01CO").inquire
     rs map { r => 
       println( r.eyu_cicsname + " " + r.tranid + " " + r.program + " " + r.definesource )
-      r.set("PROGRAM" -> "VELO")
+//      r.set("PROGRAM" -> "VELO")
     }
 
-    Target("sistemas.*.elis") foreach { cics =>
-      println( classOf[cics.getClass] )
-      //val rs = cics.from("CICSLocalTransaction") //.where("TRANID=XALA").inquire
-      // rs map { r => 
-      //   println( r.eyu_cicsname + " " + r.tranid + " " + r.program + " " + r.definesource )
-      //   r.set("PROGRAM" -> "VELO")
-      // }
+    Target("sistemas.*.elis").toList foreach { cics =>
+      val rs = cics.from("CICSLocalTransaction").where("TRANID=XALA").inquire
+      rs map { r => 
+        println( r.eyu_cicsname + " " + r.tranid + " " + r.program + " " + r.definesource )
+      }
     }
   }
 
@@ -60,11 +71,11 @@ object Main extends Logging { //extends App { //with CSSInliner {
     selectores foreach { selector => 
       println("-")
       println(selector)
-      val targets = Target(selector)
+      val targets = Target(selector).toList
       println(targets)
       targets match {
-        case Some(x)  =>  println(x.size)
-        case None     =>  println("0")
+        case List()   =>  println("0")
+        case xs       =>  println(xs.size)
       }      
     }
   }
