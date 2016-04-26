@@ -25,7 +25,8 @@ object Target {
 class Target private { self =>
 	lazy val mapa = setMapa
 
-	def get(path: String): ListaCics = {
+	def get(p: String): ListaCics = {
+		val path = p.toLowerCase
 		val patron = path.replaceAll("""\*\*""", """(\*)""").replaceAll("""\.""", """\\.""").replaceAll("""\*""", """(\.\*)""")
 		val regexp = patron.r
 		val lista = mapa filter { x => 

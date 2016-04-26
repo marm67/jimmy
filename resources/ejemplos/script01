@@ -1,2 +1,2 @@
-set entorno(prod)
-ceda define servicio(sda) tran(xala) prog(programa)
+set entorno(sistemas)
+cemt inquire servicio(sda) tran(a9mi) prog(a900cpco)

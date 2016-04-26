@@ -21,8 +21,39 @@ object Main extends Logging { //extends App { //with CSSInliner {
   // run -s "c:/scala/proyectos/jimmy/resources/ejemplos/script01" -c "c:/scala/proyectos/jimmy/resources/conf/app.conf" -u u -p p
   def main(args: Array[String]) {
     if (loadConfig(args)) {
-      pruebaTabulator
+      runScript
     }
+  }
+
+  private def runScript = {
+    val fscript = Config("script").get
+
+    if ( !new java.io.File(fscript).exists ) {
+      val msg = s"""ERROR. No existe el fichero '$fscript'""" 
+      logger.error(msg)
+      System.exit(0)
+    }
+
+    /* test file readable */
+    /* return exit code error (non zero) if a file is not readable */
+    if ( !new java.io.File(fscript).canRead) {
+      logger.error( s"""El fichero no es legible '$fscript'""")
+      System.exit(0)
+    }
+
+    val script = Source.fromFile(fscript).mkString
+    logger.info("Script:\n" + script + "**\n")
+    
+//    val p = new Parser
+    val query = Parser(script)
+  }
+
+  def pruebaScript(s: String) = {
+    val path = s"""c:/scala/proyectos/jimmy/resources/ejemplos/$s"""
+    val script = Source.fromFile(path).mkString.toUpperCase
+    println(script.mkString)
+    
+    val query = Parser(script)
   }
 
   def pruebaTabulator = {
@@ -153,43 +184,12 @@ object Main extends Logging { //extends App { //with CSSInliner {
     }
   }
 
-  private def runScript() = {
-    val fscript = Config("script").get
-
-    if ( !new java.io.File(fscript).exists ) {
-      val msg = s"""ERROR. No existe el fichero '$fscript'""" 
-      logger.error(msg)
-      System.exit(0)
-    }
-
-    /* test file readable */
-    /* return exit code error (non zero) if a file is not readable */
-    if ( !new java.io.File(fscript).canRead) {
-      logger.error( s"""El fichero no es legible '$fscript'""")
-      System.exit(0)
-    }
-
-    val script = Source.fromFile(fscript).mkString
-    logger.info("Script:\n" + script + "**\n")
-    
-//    val p = new Parser
-    val query = Parser(script)
-  }
-
   def prueba1 = {
     import com.typesafe.config.ConfigFactory
     val osName = ConfigFactory.load().getString("os.name")
     println(osName)
   }
   
-  def pruebaScript(s: String) = {
-    val path = s"""c:/scala/proyectos/jimmy/resources/ejemplos/$s"""
-    val script = Source.fromFile(path).mkString.toUpperCase
-    println(script.mkString)
-    
-    val query = Parser(script)
-  }
-
   def pruebaAssembly() = {
     import java.io._
     import com.typesafe.config.ConfigFactory

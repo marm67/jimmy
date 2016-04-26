@@ -10,15 +10,15 @@ object Parser extends JavaTokenParsers {
 
   def comando: Parser[Comando] = cemt | ceda | set
 
-  def set: Parser[Comando] = "SET" ~> ident ~ ("(" ~> ident <~ ")") ^^ { case a ~ b => SET(a, b) }
+  def set: Parser[Comando] = "set" ~> ident ~ ("(" ~> ident <~ ")") ^^ { case a ~ b => SET(a, b) }
 
-  def cemt: Parser[Comando] = "CEMT" ~> ("INQUIRE" | "CREATE" | "SET" | "DISCARD") ~ recursoT ^^ { case a ~ b  => CEMT(a, b) }
+  def cemt: Parser[Comando] = "cemt" ~> ("inquire" | "create" | "set" | "discard") ~ recursoT ^^ { case a ~ b  => CEMT(a, b) }
 
-  def ceda: Parser[Comando] = "CEDA" ~> ("EXPAND" | "DEFINE" | "ALTER" | "DELETE") ~ recursoT ^^ { case a ~ b => CEDA(a, b) }
+  def ceda: Parser[Comando] = "ceda" ~> ("expand" | "define" | "alter" | "delete") ~ recursoT ^^ { case a ~ b => CEDA(a, b) }
 
   def recursoT: Parser[RecursoT] = servicio | recurso ^^ { case a => a }
 
-  def servicio: Parser[Servicio] = "SERVICIO" ~ "(" ~ valor ~ ")" ~ parametros ^^ { case a ~ "(" ~ b ~ ")" ~ c => Servicio(b, c) }
+  def servicio: Parser[Servicio] = "servicio" ~ "(" ~ valor ~ ")" ~ parametros ^^ { case a ~ "(" ~ b ~ ")" ~ c => Servicio(b, c) }
 
   def recurso: Parser[Recurso] = ident ~ "(" ~ valor ~ ")" ~ parametros ^^ { case a ~ "(" ~ b ~ ")" ~ c => Recurso(a, b, c) }
 
@@ -29,7 +29,7 @@ object Parser extends JavaTokenParsers {
   def valor: Parser[String] = """(\w|\*)+""".r
   
   def apply(s: String) = {
-    val S = s.toUpperCase
+    val S = s.toLowerCase
     val presult = parseAll(script, S)
     presult match {
       case Success(r, n) => parseOk( Script(r) )
@@ -40,7 +40,7 @@ object Parser extends JavaTokenParsers {
 
   def parseOk(rs: Script) = {
 //    println(rs)
-    Interpreter.execute(rs)
+    Interprete.execute(rs)
 //    rs map (_.check)
   }
 
